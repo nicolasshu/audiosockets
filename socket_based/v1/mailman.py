@@ -34,7 +34,7 @@ def handle_client(conn,addr):
                     conn.send("Disconnected".encode(FORMAT))
                     break
                 data = pickle.loads(msg)
-                # print(datetime.now(),data["data"].shape)
+                print(datetime.now(),data["data"].shape)
                 if data["node"] == "recorder":
                     send_to_processor(msg)
                 conn.send("Message received.".encode(FORMAT))

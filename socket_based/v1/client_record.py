@@ -35,13 +35,9 @@ q = queue.Queue()
 interval = 2 # seconds
 
 def send_message(client,msg):
-    # print("get-header")
     header = get_header(msg)
-    # print('send-header')
     client.send(header)
-    # print('send-msg')
     client.sendall(msg)
-    # print('sent-msg')
     print(client.recv(HEADER).decode(FORMAT))
 
 def send_audio_data(client,data,fs):
