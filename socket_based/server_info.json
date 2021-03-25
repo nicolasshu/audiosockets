@@ -1,0 +1,7 @@
+{
+    "MAILMAN": 5052,
+    "PROCESSOR": 5051,
+    "HEADER": 64,
+    "FORMAT": "utf-8",
+    "DISCONNECT_MSG": "DISCONNECT"
+}
