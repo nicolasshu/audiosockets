@@ -6,6 +6,9 @@ import time
 import argparse
 import numpy as np
 from basesocket import ClientSocket
+import logging
+
+
 
 class RecordSocket(ClientSocket):
     def __init__(self, *args,**kwargs):
@@ -59,12 +62,13 @@ if __name__ == "__main__":
                 data.append(q.get())
                 if dt.microseconds/1000 >= interval:
                     start_time = datetime.datetime.now()
-                    print(start_time, end=": ")
                     collected_audio = np.concatenate(data,axis=0)
                     data = []
                     recorder.send_audio_data(collected_audio,args.samplerate)
+                    logging.info(f"Send audio data")
             except KeyboardInterrupt:
                 recorder.send_text(recorder.client,recorder.DISCONNECT_MSG)
+                logging.info("\nDisconnected from server")
                 break
             except Exception as e:
                 print(e)

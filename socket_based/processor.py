@@ -6,6 +6,7 @@ import time
 import numpy as np
 import pickle
 from basesocket import ClientSocket
+import logging
 
 class ProcessorSocket(ClientSocket):
     def __init__(self, *args,**kwargs):
@@ -28,13 +29,11 @@ class ProcessorSocket(ClientSocket):
                 if n_bytes:
                     msg = self.get_long_message(n_bytes, self.client)
                     data = pickle.loads(msg)
-                    print(data)
+                    logging.debug(f"Received data of shape {data['data'].shape}")
                 # self.confirm_message_received(self.client)
-                print(datetime.datetime.now())
             except KeyboardInterrupt:
-                
                 self.send_text(self.client,self.DISCONNECT_MSG)
-                print("Disconnected")
+                logging.info("Disconnected from server")
                 break
 
 if __name__ == "__main__":

@@ -133,3 +133,4 @@ ambientSoundRecordingToolbox/data/
 *.wav
 .vscode/settings.json
 *.h5
+socket_based/.vscode/settings.json

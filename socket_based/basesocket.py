@@ -2,6 +2,7 @@ import socket
 import json
 import pickle
 import threading
+import logging
 
 class BaseSocket:
     def __init__(self, info):
@@ -10,6 +11,18 @@ class BaseSocket:
     def load_network_info(self, path):
         with open(path,"rb") as f:
             self.server_info = json.load(f)
+        
+        log_levels = {"debug": logging.DEBUG,
+                      "info": logging.INFO,
+                      "warning": logging.WARNING,
+                      "error": logging.ERROR,
+                      "critical": logging.CRITICAL}
+
+        level = self.server_info["logging_level"].lower()
+        logging.basicConfig(format = self.server_info["logging_format"],
+                            level = log_levels[level])
+        
+        logging.debug("Loading network info")
         # self.SERVER = socket.gethostbyname(socket.gethostname())
         self.SERVER = "192.168.1.14"
         self.PORT = self.server_info["PORT"]
@@ -17,13 +30,15 @@ class BaseSocket:
         self.FORMAT = self.server_info["FORMAT"]
         self.DISCONNECT_MSG = self.server_info["DISCONNECT_MSG"]
 
+        
+
     def send_message(self,node,msg):
         header = self.get_header(msg)
         node.send(header)
         node.sendall(msg)
 
         # Confirm that target received the message
-        print(node.recv(self.HEADER).decode(self.FORMAT))
+        logging.info(node.recv(self.HEADER).decode(self.FORMAT))
 
     def get_header(self, msg):
         msg_length = len(msg)
@@ -40,12 +55,14 @@ class BaseSocket:
         self.send_message(node, msg)
 
     def get_number_of_bytes_from_header(self, conn):
+        logging.debug("Obtaining the number of bytes for the incoming message")
         header = conn.recv(self.HEADER)
-        print(header)
         msg_n_bytes = int(header.decode(self.FORMAT))
+        logging.debug(f"The number of bytes for the incoming message is {msg_n_bytes}")
         return msg_n_bytes
 
     def get_long_message(self, n_bytes, conn):
+        logging.debug("Compiling the message")
         full_msg = []
         remaining = n_bytes
         while remaining > 0:
@@ -53,6 +70,7 @@ class BaseSocket:
             full_msg.append(partial_msg)
             remaining -= len(partial_msg)
         msg = b"".join(full_msg)
+        logging.debug(f"Obtained a message with length {len(msg)}")
         return msg
 
     def confirm_message_received(self, conn):
@@ -71,20 +89,25 @@ class ClientSocket(BaseSocket):
 class ServerSocket(BaseSocket):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        logging.info("Creating server socket")
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        logging.info("Successfully created server socket")
 
     def bind_listen_accept(self, ip, port):
+        logging.info(f"Binding socket to {ip}:{port}")
         self.server.bind((ip,port))
+        logging.info(f"Successfully binded the socket to {ip}:{port}")
         self.server.listen()
-        print(f"[LISTENING] Server is listening on {self.SERVER}")
+        logging.info(f"Server is listening to the port {ip}:{port}")
         while True:
             try:
                 conn, addr = self.server.accept()
                 thread = threading.Thread(target = self.handle_client, args = (conn, addr))
                 thread.start()
-                print(f"[ACTIVE CONNECTIONS] {threading.activeCount()-1}")
+                logging.info(f"There are currently {threading.activeCount()-1} active connections")
 
             except KeyboardInterrupt:
+                logging.info("\nQuitting the server")
                 self.exit()
                 break
             

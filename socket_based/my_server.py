@@ -1,8 +1,14 @@
+#%%
 import json
 import socket
 import pickle
 import threading
 from basesocket import ServerSocket
+import logging
+#%%
+
+config = "%(asctime)s - %(message)s"
+logging.basicConfig(format=config, level=logging.DEBUG)
 
 class Mailman(ServerSocket):
     def __init__(self, *args, **kwargs):
@@ -14,61 +20,56 @@ class Mailman(ServerSocket):
 
 
     def handle_client(self, conn, addr):
-        print("new")
-        print(f"[NEW CONNECTION] {addr} connected")
+        logging.debug(f"A new connection appeared from {addr}")
         connected = True
         data = {}
         while connected:
-            print("Step 1: Get number of bytes")
             n_bytes = self.get_number_of_bytes_from_header(conn)
-            print(f"\tGot number of bytes: {n_bytes}")
             if n_bytes:
-                print("Step 2: Get long message")
                 msg = self.get_long_message(n_bytes, conn)
-                print(f"\tGot long message with length {len(msg)}")
                 if msg == self.DISCONNECT_MSG.encode(self.FORMAT):
+                    logging.info(f"Disconnecting from {addr}")
                     if "name" in data:
                         del self.processors[data["name"]]
-                    print("Deleted", self.processors)
+                        logging.debug(f"Removing {data['name']} from list of processors")
+                        logging.debug(f"Now there are {len(self.processors)} processors")
                     conn.send("Disconnected\n".encode(self.FORMAT))
+                    conn.close()
                     break
-                print("Step 3: Pickling the data: ",end="")
+                
                 data = pickle.loads(msg)
-                print("Pickled!")
-                print("Step 4: Do we have a 'node' key?", end =" ")
+                logging.debug("Serialized the data")
+
+                logging.debug("Checking whether client is accepted")
                 if "node" in data.keys():
-                    print(f"Yes! It is '{data['node']}'")
+                    logging.debug("Client has been accepted")
                     if data["node"] == "recorder":
-                        print("Step 5: Confirm to the client that we received the message")
-                        # print(f"{addr}: ",data.keys())
+                        logging.debug("Client is a recorder")
+                        logging.debug("Confirming to client that a message was received")
                         self.confirm_message_received(conn)
-                        # print("Sending data to procs...")
-                        # print("************")
-                        # print(self.processors)
-                        # print("************")
-                        print("Step 6: For every proc, send the data")
+                        logging.debug("Sending data to every current processor")
                         for proc_name, proc_conn in self.processors.items():
-                            print(f"Step 6a: Sending data to {proc_name}")
+                            logging.debug(f"Sending data to {proc_name}")
                             msg = pickle.dumps(data)
                             header = self.get_header(msg)
                             proc_conn.send(header)
                             proc_conn.sendall(msg)
-                            # print(f"\t[{proc_name}]",proc_conn.recv(self.HEADER).decode(self.FORMAT))
-                            print(f"Step 6ab: Sent data to {proc_name}")
+                            logging.debug(f"Sent data to {proc_name}")
                     if data["node"] == "processor":
-                        print("Step 5: A new processor. Adding it to the list")
+                        logging.info(f"New client is a processor. Adding {data['name']} to list of processors")
                         self.processors[data["name"]] = conn
-                        print(f"\tDone! Now we have {len(self.processors)} processors")
-                        print("Step 6: Confirm to the processor that we received the message")
-                        self.confirm_message_received(conn)
+                        logging.info(f"Now there are {len(self.processors)} processors")
+                        conn.send("Connection has been established".encode(self.FORMAT))
+                        logging.debug(f"Sent {data['name']} a confirmation message")
 
                 else:
+                    logging.info(f"The connection from {addr} is not a proper node. Sending message back warning the user")
                     conn.send("Whoops not a node.".encode(self.FORMAT))
-            print(f"[ACTIVE CONNECTIONS] {threading.activeCount()-1} | {len(self.processors)}")
             
+            logging.info(f"There are currently {threading.activeCount()-1} active connections")
+            logging.info(f"There are currently {len(self.processors)} processors")
 
 server = Mailman("server_info.json")
-
 server.start()
 
 # Receive all of the connections
