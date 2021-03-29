@@ -27,9 +27,9 @@ class BaseProcessor(ClientSocket):
             self.connect(self.SERVER, self.PORT)
         except ConnectionRefusedError:
             # If you can't connect, keep trying every second
-            print("Trying to connect")
+            logging.info("Trying to connect")
             time.sleep(1)
-            self.__init__(*args, **kwargs)
+            self.__init__(name,*args, **kwargs)
 
     def start(self):
         """Start the processor client
@@ -75,5 +75,5 @@ class BaseProcessor(ClientSocket):
 
 if __name__ == "__main__":
     info = "server_info.json"
-    processor = BaseProcessor(info)
+    processor = BaseProcessor("VAD",info)
     processor.start()
