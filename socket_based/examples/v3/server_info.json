@@ -1,0 +1,8 @@
+{
+    "PORT": 5050,
+    "HEADER": 64,
+    "FORMAT": "utf-8",
+    "DISCONNECT_MSG": "DISCONNECT",
+    "logging_format": "%(asctime)s - %(message)s", 
+    "logging_level": "info"
+}
