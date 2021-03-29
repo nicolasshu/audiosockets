@@ -3,10 +3,10 @@ import json
 import socket
 import pickle
 import threading
-from basesocket import ServerSocket
+from .basesocket import ServerSocket
 import logging
 
-class Mailman(ServerSocket):
+class MailmanSocket(ServerSocket):
     def __init__(self, *args, **kwargs):
         """Initialize a Mailman server
 
@@ -129,5 +129,5 @@ class Mailman(ServerSocket):
             logging.info(f"There are currently {len(self.processors)} processors")
 
 if __name__ == "__main__":
-    server = Mailman("server_info.json")
+    server = MailmanSocket("server_info.json")
     server.start()

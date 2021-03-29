@@ -5,12 +5,12 @@ import datetime
 import time
 import argparse
 import numpy as np
-from basesocket import ClientSocket
+from .basesocket import ClientSocket
 import logging
 
 
 # Define a recording socket
-class RecordSocket(ClientSocket):
+class RecorderSocket(ClientSocket):
     def __init__(self, *args,**kwargs):
         """Initialize a recording socket
 
@@ -109,5 +109,5 @@ if __name__ == "__main__":
 
     # Obtain the Network Information
     info = "server_info.json"
-    recorder = RecordSocket(info)
+    recorder = RecorderSocket(info)
     recorder.start()

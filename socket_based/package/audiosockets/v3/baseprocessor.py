@@ -5,11 +5,11 @@ import datetime
 import time
 import numpy as np
 import pickle
-from basesocket import ClientSocket
+from .basesocket import ClientSocket
 import logging
 
 
-class BaseProcessor(ClientSocket):
+class BaseProcessorSocket(ClientSocket):
     def __init__(self, name, *args,**kwargs):
         """Initialize a Base Processor
 
@@ -75,5 +75,5 @@ class BaseProcessor(ClientSocket):
 
 if __name__ == "__main__":
     info = "server_info.json"
-    processor = BaseProcessor("VAD",info)
+    processor = BaseProcessorSocket("VAD",info)
     processor.start()
