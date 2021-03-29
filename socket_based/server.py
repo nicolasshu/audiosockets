@@ -8,6 +8,12 @@ import logging
 
 class Mailman(ServerSocket):
     def __init__(self, *args, **kwargs):
+        """Initialize a Mailman server
+
+        Args:
+            args: Arguments to be passed to ServerSocket
+            kwargs" Keyword arguments to be passed to ServerSocket
+        """
         # Initialize a server socket
         super().__init__(*args,**kwargs)
 
@@ -16,15 +22,26 @@ class Mailman(ServerSocket):
         self.processors = {}
 
     def start(self):
+        """Start the server to listen and accepting connections and send them to
+            different processes
+
+            Here, every new connection will be handled in a different thread via 
+            the handle_client() method. By default, it will treat every new 
+            connection as an equal client. Instead, we will treat different 
+            clients differently (i.e. recorders and processors)
+        """
+
         # Bind, listen, and accept new connections
         self.bind_listen_accept(self.SERVER, self.PORT)
-        # Here, every new connection will be handled in a different thread via 
-        # the handle_client() method. By default, it will treat every new 
-        # connection as an equal client. Instead, we will treat different 
-        # clients differently (i.e. recorders and processors)
         
 
     def handle_client(self, conn, addr):
+        """Handle a new connection to a client .
+
+        Args:
+            conn (socket): Socket of the client
+            addr (tuple): Address bound to the socket of the client
+        """
         # Start handling this new client
         logging.debug(f"A new connection appeared from {addr}")
         connected = True

@@ -12,6 +12,12 @@ import logging
 # Define a recording socket
 class RecordSocket(ClientSocket):
     def __init__(self, *args,**kwargs):
+        """Initialize a recording socket
+
+        Args:
+            args: Arguments to be passed to ClientSocket
+            kwargs" Keyword arguments to be passed to ClientSocket
+        """
         # Initialize base socket
         super().__init__(*args, **kwargs)
         try:

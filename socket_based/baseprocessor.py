@@ -11,6 +11,13 @@ import logging
 
 class BaseProcessor(ClientSocket):
     def __init__(self, name, *args,**kwargs):
+        """Initialize a Base Processor
+
+        Args:
+            name (str): Name of the processor
+            args: Arguments to be passed to ClientSocket
+            kwargs" Keyword arguments to be passed to ClientSocket
+        """
         # Initialize a processor socket
         super().__init__(*args, **kwargs)
         # Establish the name of the processor
@@ -25,6 +32,8 @@ class BaseProcessor(ClientSocket):
             self.__init__(*args, **kwargs)
 
     def start(self):
+        """Start the processor client
+        """
         # Create a base object to identify yourself
         start_obj = {"node": "processor", "name": self.name}
 
@@ -56,6 +65,11 @@ class BaseProcessor(ClientSocket):
                 break
 
     def process_data(self,data):
+        """Method to be inherited to process some data
+
+        Args:
+            data (obj): Data to be processed
+        """
         # Inherit and then do something new here!
         print(data)
 

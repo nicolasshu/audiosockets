@@ -9,10 +9,20 @@ class BaseSocket:
     This is the base socket which others inherit from
     """
     def __init__(self, info):
+        """Initialize the socket
+
+        Args:
+            info (str): Path to where the network information is located
+        """
         # Load the network information
         self.load_network_info(info)
 
     def load_network_info(self, path):
+        """Load the network info from a JSON file .
+
+        Args:
+            path (str): Path to where the network information is located
+        """
         with open(path,"rb") as f:
             self.server_info = json.load(f)
         
@@ -36,9 +46,13 @@ class BaseSocket:
         self.FORMAT = self.server_info["FORMAT"]
         self.DISCONNECT_MSG = self.server_info["DISCONNECT_MSG"]
 
-        
-
     def send_message(self,node,msg):
+        """Send a message to a connection
+
+        Args:
+            node (socket): A socket to which to send a message
+            msg (bytes str): A serialized message to send to a socket
+        """
         # Obtain the header of the message which will be used to establish the
         # size of the message to be sent 
         header = self.get_header(msg)
@@ -53,6 +67,16 @@ class BaseSocket:
         logging.info(node.recv(self.HEADER).decode(self.FORMAT))
 
     def get_header(self, msg):
+        """Obtain the header for a message
+
+        Args:
+            msg (bytes str): A serialized message
+
+        Returns:
+            bytes str: A bytes string which will be the header of the message. 
+                It will indicate the number of bytes that the message will 
+                contain
+        """
         # Obtain the length of the message
         msg_length = len(msg)
 
@@ -62,6 +86,12 @@ class BaseSocket:
         return header
     
     def send_text(self, node, text):
+        """Send a text to a socket
+
+        Args:
+            node (socket): A socket connection to send a text to
+            text (str): A string to send to the socket
+        """
         # Encode the text to the desired format
         msg = text.encode(self.FORMAT)
 
@@ -69,6 +99,12 @@ class BaseSocket:
         self.send_message(node, msg)
 
     def send_obj(self, node, obj):
+        """Send an object to a socket
+
+        Args:
+            node (socket): A socket connection to which send an object
+            obj (obj): An object that can be pickled serialized 
+        """
         # Serialize the object to a message
         msg = pickle.dumps(obj)
 
@@ -76,6 +112,15 @@ class BaseSocket:
         self.send_message(node, msg)
 
     def get_number_of_bytes_from_header(self, conn):
+        """Obtain the number of bytes from a header message
+
+        Args:
+            conn (socket): A socket connection to which receive a header from
+
+        Returns:
+            (int): An integer number of bytes read from the header indicating 
+                the number of bytes that the message will contain
+        """
         # Receive the header itself
         logging.debug("Obtaining the number of bytes for the incoming message")
         header = conn.recv(self.HEADER)
@@ -87,7 +132,22 @@ class BaseSocket:
         return msg_n_bytes
 
     def get_long_message(self, n_bytes, conn):
+        """Return a long message from the socket. Sometimes, it is possible that
+            a message being sent through a socket connection may not be complete. 
+            For example, even though you set a socket to receive n_bytes, it is
+            possible that, if n_bytes >> 1, then it may receive less than 
+            n_bytes at a time until n_bytes has been sent. This method takes 
+            care of that by looping over the receiving function of a socket 
+            until one has received the full message
 
+        Args:
+            n_bytes (int): An integer number of bytes that a socket may receive
+            conn (socket): A socket from which to receive a message
+
+        Returns:
+            (bytes str): A bytes string that contains the entire serialized 
+                message
+        """
         logging.debug("Compiling the message")
         # Initialize the list of messages and the number of expected bytes
         full_msg = []
@@ -108,6 +168,11 @@ class BaseSocket:
         return msg
 
     def confirm_message_received(self, conn):
+        """Confirm that the message is received .
+
+        Args:
+            conn (socket): Socket connection to which send a confirmation message
+        """
         # Send a confirmation message
         conn.send("Message received.".encode(self.FORMAT))
 
@@ -115,17 +180,35 @@ class BaseSocket:
 
 class ClientSocket(BaseSocket):
     def __init__(self, *args, **kwargs):
+        """Initialize the client socket
+
+        Args:
+            args: Arguments to be passed to BaseSocket
+            kwargs" Keyword arguments to be passed to BaseSocket
+        """
         super().__init__(*args, **kwargs)
 
         # Create a client socket
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self,ip,port):
+        """Connect to a remote host located at {ip}:{port}
+
+        Args:
+            ip (str): An IP address to connect to
+            port (str): A port number to connect to
+        """
         # Connect the client to a server with the address {ip}:{port}
         self.client.connect((ip,port))
 
 class ServerSocket(BaseSocket):
     def __init__(self, *args, **kwargs):
+        """Create the server socket and initialize it.
+
+        Args:
+            args: Arguments to be passed to BaseSocket
+            kwargs" Keyword arguments to be passed to BaseSocket
+        """
         # Initialize the base socket
         super().__init__(*args, **kwargs)
 
@@ -135,6 +218,13 @@ class ServerSocket(BaseSocket):
         logging.info("Successfully created server socket")
 
     def bind_listen_accept(self, ip, port):
+        """Bind the socket to the address {ip}:{port}, listen for new 
+            connections, accept them, and deploy them to different threads
+
+        Args:
+            ip (str): An IP address to connect to
+            port (str): A port number to connect to
+        """
         # Bind your socket to an address
         logging.info(f"Binding socket to {ip}:{port}")
         self.server.bind((ip,port))
@@ -161,11 +251,19 @@ class ServerSocket(BaseSocket):
                 break
             
     def exit(self):
-        # Method to be overwritten in case one wishes to perform an action prior
-        # to quitting the server
+        """Method to be overwritten in case one wishes to perform an action 
+            prior to quitting the server
+        """
+        # 
         pass 
     
     def handle_client(self, conn, addr):
+        """Handle a connection to a client .
+
+        Args:
+            conn (socket): Socket of the client
+            addr (tuple): Address bound to the socket of the client
+        """
         print(f"[NEW CONNECTION] {addr} connected")
         connected = True
         while connected:
@@ -193,5 +291,10 @@ class ServerSocket(BaseSocket):
         conn.close()
 
     def process_msg(self,msg):
-        # Inherit and do something new here!
+        """Dummy method to process the message. Inherit this class and overwrite
+            the method in order to do something new with it!
+
+        Args:
+            msg (bytes str): Message to process
+        """
         return msg
