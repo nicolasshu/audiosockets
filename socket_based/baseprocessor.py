@@ -10,9 +10,11 @@ import logging
 
 
 class BaseProcessor(ClientSocket):
-    def __init__(self, *args,**kwargs):
+    def __init__(self, name, *args,**kwargs):
         # Initialize a processor socket
         super().__init__(*args, **kwargs)
+        # Establish the name of the processor
+        self.name = name
         try:
             # Try to connect to the server
             self.connect(self.SERVER, self.PORT)
@@ -24,7 +26,7 @@ class BaseProcessor(ClientSocket):
 
     def start(self):
         # Create a base object to identify yourself
-        start_obj = {"node": "processor", "name": "VAD"}
+        start_obj = {"node": "processor", "name": self.name}
 
         # Send the object to the server
         self.send_obj(self.client, start_obj)
