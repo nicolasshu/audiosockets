@@ -111,5 +111,6 @@ class Mailman(ServerSocket):
             logging.info(f"There are currently {threading.activeCount()-1} active connections")
             logging.info(f"There are currently {len(self.processors)} processors")
 
-server = Mailman("server_info.json")
-server.start()
+if __name__ == "__main__":
+    server = Mailman("server_info.json")
+    server.start()
