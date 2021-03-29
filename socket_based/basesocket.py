@@ -10,9 +10,9 @@ class BaseSocket:
     def load_network_info(self, path):
         with open(path,"rb") as f:
             self.server_info = json.load(f)
-        self.SERVER = socket.gethostbyname(socket.gethostname())
-        self.MAILMAN = self.server_info["MAILMAN"]
-        self.PROCESSOR = self.server_info["PROCESSOR"]
+        # self.SERVER = socket.gethostbyname(socket.gethostname())
+        self.SERVER = "192.168.1.14"
+        self.PORT = self.server_info["PORT"]
         self.HEADER = self.server_info["HEADER"]
         self.FORMAT = self.server_info["FORMAT"]
         self.DISCONNECT_MSG = self.server_info["DISCONNECT_MSG"]
@@ -21,6 +21,8 @@ class BaseSocket:
         header = self.get_header(msg)
         node.send(header)
         node.sendall(msg)
+
+        # Confirm that target received the message
         print(node.recv(self.HEADER).decode(self.FORMAT))
 
     def get_header(self, msg):
@@ -36,6 +38,27 @@ class BaseSocket:
     def send_obj(self, node, obj):
         msg = pickle.dumps(obj)
         self.send_message(node, msg)
+
+    def get_number_of_bytes_from_header(self, conn):
+        header = conn.recv(self.HEADER)
+        print(header)
+        msg_n_bytes = int(header.decode(self.FORMAT))
+        return msg_n_bytes
+
+    def get_long_message(self, n_bytes, conn):
+        full_msg = []
+        remaining = n_bytes
+        while remaining > 0:
+            partial_msg = conn.recv(n_bytes)
+            full_msg.append(partial_msg)
+            remaining -= len(partial_msg)
+        msg = b"".join(full_msg)
+        return msg
+
+    def confirm_message_received(self, conn):
+        conn.send("Message received.".encode(self.FORMAT))
+
+
 
 class ClientSocket(BaseSocket):
     def __init__(self, *args, **kwargs):
@@ -82,23 +105,6 @@ class ServerSocket(BaseSocket):
                 self.confirm_message_received(conn)
         conn.close()
 
-    def confirm_message_received(self, conn):
-        conn.send("Message received.".encode(self.FORMAT))
-
-    def get_number_of_bytes_from_header(self, conn):
-        header = conn.recv(self.HEADER)
-        msg_n_bytes = int(header.decode(self.FORMAT))
-        return msg_n_bytes
-
-    def get_long_message(self, n_bytes, conn):
-        full_msg = []
-        remaining = n_bytes
-        while remaining > 0:
-            partial_msg = conn.recv(n_bytes)
-            full_msg.append(partial_msg)
-            remaining -= len(partial_msg)
-        msg = b"".join(full_msg)
-        return msg
 
     def process_msg(self,msg):
         return msg

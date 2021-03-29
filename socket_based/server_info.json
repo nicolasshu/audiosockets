@@ -1,6 +1,5 @@
 {
-    "MAILMAN": 5050,
-    "PROCESSOR": 5051,
+    "PORT": 5052,
     "HEADER": 64,
     "FORMAT": "utf-8",
     "DISCONNECT_MSG": "DISCONNECT"

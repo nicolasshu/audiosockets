@@ -2,6 +2,7 @@
 import queue
 import sounddevice as sd
 import datetime
+import time
 import argparse
 import numpy as np
 from basesocket import ClientSocket
@@ -9,8 +10,13 @@ from basesocket import ClientSocket
 class RecordSocket(ClientSocket):
     def __init__(self, *args,**kwargs):
         super().__init__(*args, **kwargs)
-        self.connect(self.SERVER, self.MAILMAN)
-
+        try:
+            self.connect(self.SERVER, self.PORT)
+        except ConnectionRefusedError:
+            
+            print("Trying to connect")
+            time.sleep(1)
+            self.__init__(*args, **kwargs)
     def send_audio_data(self, data, fs):
         audio_data = {"node": "recorder", 
                       "data": data, 
@@ -53,7 +59,7 @@ if __name__ == "__main__":
                 data.append(q.get())
                 if dt.microseconds/1000 >= interval:
                     start_time = datetime.datetime.now()
-                    print(start_time)
+                    print(start_time, end=": ")
                     collected_audio = np.concatenate(data,axis=0)
                     data = []
                     recorder.send_audio_data(collected_audio,args.samplerate)
