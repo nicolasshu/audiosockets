@@ -12,7 +12,11 @@ class RecordSocket(ClientSocket):
         self.connect(self.SERVER, self.MAILMAN)
 
     def send_audio_data(self, data, fs):
-        audio_data = {"node": "recorder", "data": data, "fs": fs}
+        audio_data = {"node": "recorder", 
+                      "data": data, 
+                      "fs": fs,
+                      "ts": datetime.datetime.now()
+                    }
         self.send_obj(self.client, audio_data)
 
 def queue_cb(data, frames, times, status):

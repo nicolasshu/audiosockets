@@ -26,6 +26,7 @@ class Mailman(ServerSocket):
     def exit(self):
         self.send_text(self.processor,self.DISCONNECT_MSG)
 
-info = "server_info.json"
-mailman = Mailman(info)
-mailman.start()
+if __name__ == '__main__':
+    info = "server_info.json"
+    mailman = Mailman(info)
+    mailman.start()
