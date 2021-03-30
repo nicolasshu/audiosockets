@@ -21,9 +21,6 @@ class RecorderSocket(ClientSocket):
         # Initialize base socket
         super().__init__(*args, **kwargs)
         try:
-            # Try to connect to the server
-            self.connect(self.SERVER, self.PORT)
-
             # Prepare Audio Recording
             parser = argparse.ArgumentParser()
             parser.add_argument("-l","--list_devices", action="store_true",help="Show list of all devices")
@@ -32,6 +29,9 @@ class RecorderSocket(ClientSocket):
             parser.add_argument('-c', '--channels', type=int, default=1, help='number of input channels')
             parser.add_argument('-T', '--samplingperiod', type=float, default=0.5, help='sampling period in seconds')
             self.args = parser.parse_args()
+
+            # Try to connect to the server
+            self.connect(self.SERVER, self.PORT)
 
             # If a sample rate is not established, obtain the 
             # sampling rate from the chosen recording device
@@ -84,7 +84,7 @@ class RecorderSocket(ClientSocket):
                     data.append(self.q.get())
 
                     # For every {samplingperiod},
-                    if dt.microseconds/1000 >= self.interval:
+                    if (dt.microseconds/1000 + dt.seconds*1000) >= self.interval:
                         # Create a new start time
                         start_time = datetime.datetime.now()
 
