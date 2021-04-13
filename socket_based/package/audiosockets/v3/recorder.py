@@ -30,6 +30,9 @@ class RecorderSocket(ClientSocket):
             parser.add_argument('-T', '--samplingperiod', type=float, default=0.5, help='sampling period in seconds')
             self.args = parser.parse_args()
 
+            if self.args.list_devices:
+                print(sd.query_devices())
+                parser.exit(0)
             # Try to connect to the server
             self.connect(self.SERVER, self.PORT)
 
