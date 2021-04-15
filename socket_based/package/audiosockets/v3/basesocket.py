@@ -39,8 +39,8 @@ class BaseSocket:
         
         # Establish the attributes to every parameter necessary
         logging.debug("Loading network info")
-        # self.SERVER = socket.gethostbyname(socket.gethostname())
-        self.SERVER = "192.168.1.14"
+        self.SERVER = socket.gethostbyname(socket.gethostname())
+        #self.SERVER = "192.168.1.14"
         self.PORT = self.server_info["PORT"]
         self.HEADER = self.server_info["HEADER"]
         self.FORMAT = self.server_info["FORMAT"]
