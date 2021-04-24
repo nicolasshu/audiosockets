@@ -1,5 +1,40 @@
 # Audiosockets
 
+## Prerequisites
+
+### Basic Compilers
+
+You might not have `gcc` or `make`, so make sure to install them
+
+```
+sudo apt install gcc make
+```
+
+### Install PortAudio
+In case you do not have it, you will need to install PortAudio. To do that, first run
+
+```
+sudo apt install libasound-dev
+```
+
+Then download the latest PortAudio at its [Downloads Page](http://files.portaudio.com/download.html), e.g. (2021-04-23)
+
+```
+wget http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
+```
+
+Then unzip it (`tar -xvf <file>`), go into the directory and run
+
+```
+./configure
+make
+sudo make install
+```
+
+```
+sudo apt install portaudio19-dev
+```
+
 ## Installation
 
 Clone the repository, go into the repository and run 
