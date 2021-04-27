@@ -94,6 +94,8 @@ class RecorderSocket(ClientSocket):
                         # Compile all of the data and 
                         # reset the accumulated list of data
                         collected_audio = np.concatenate(data,axis=0)
+                        collected_audio = collected_audio[-int(self.interval/1000*self.args.samplerate):]
+                        
                         data = []
 
                         # Send the audio data to the server
