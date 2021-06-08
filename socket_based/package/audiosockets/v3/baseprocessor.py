@@ -54,9 +54,23 @@ class BaseProcessorSocket(ClientSocket):
                     data = pickle.loads(msg)
                     logging.debug(f"Received data of shape {data['data'].shape}")
 
-                    # Process the data in whichever way you prefer
-                    self.process_data(data)
+                    # TODO 
+                    # Try to process the data
+                    # If something goes wrong, then break the connection with the server
+                    #    allowing the server to still operate and letting data 
+                    #    be passed 
 
+                    # Process the data in whichever way you prefer
+                    try: 
+                        self.process_data(data)
+                    except Exception as e:
+                        
+                        logging.info("Couldn't process the data")
+                        logging.info(e)
+
+                        self.send_text(self.client,self.DISCONNECT_MSG)
+                        logging.info("Disconnected from server")
+                        break
             except KeyboardInterrupt:
                 # If you wish to disconnect, send a disconnecting 
                 # message to the server

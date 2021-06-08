@@ -125,6 +125,16 @@ class BaseSocket:
         logging.debug("Obtaining the number of bytes for the incoming message")
         header = conn.recv(self.HEADER)
 
+        # try:
+        #     # Interpret the header to determine the number of bytes of the message
+        #     msg_n_bytes = int(header.decode(self.FORMAT))
+        #     logging.debug(f"The number of bytes for the incoming message is {msg_n_bytes}")
+
+        #     return msg_n_bytes
+        # except:
+        #     print("This was not a n_bytes")
+        #     return None
+
         # Interpret the header to determine the number of bytes of the message
         msg_n_bytes = int(header.decode(self.FORMAT))
         logging.debug(f"The number of bytes for the incoming message is {msg_n_bytes}")
