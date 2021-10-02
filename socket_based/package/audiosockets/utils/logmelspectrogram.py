@@ -47,8 +47,8 @@ class LogMelSpectrogram:
             n_fft = self.win_length,
             hop_length = self.hop_length,
             n_mels = self.n_mels,
-            fmin = 50.,
-            fmax = self.sample_rate // 2
+            fmin = 0.,
+            fmax = self.sample_rate / 2.0
         )
     
     def rescale(self, x):
@@ -68,7 +68,7 @@ class LogMelSpectrogram:
         x = np.squeeze(x)
 
         # Scale the data to range between -1 and 1
-        x = self.rescale(x)
+        # x = self.rescale(x)
 
         # Pass it through the selected method
         x = self.method(x)
