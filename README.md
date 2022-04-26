@@ -35,6 +35,10 @@ sudo make install
 sudo apt install portaudio19-dev
 ```
 
+```
+yay -S portaudio
+```
+
 ## Installation
 
 Clone the repository, go into the repository and run 
