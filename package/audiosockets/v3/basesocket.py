@@ -25,7 +25,7 @@ class BaseSocket:
         """
         with open(path,"rb") as f:
             self.server_info = json.load(f)
-        
+
         log_levels = {"debug": logging.DEBUG,
                       "info": logging.INFO,
                       "warning": logging.WARNING,
@@ -36,10 +36,13 @@ class BaseSocket:
         level = self.server_info["logging_level"].lower()
         logging.basicConfig(format = self.server_info["logging_format"],
                             level = log_levels[level])
-        
+
         # Establish the attributes to every parameter necessary
         logging.debug("Loading network info")
-        self.SERVER = socket.gethostbyname(socket.gethostname())
+        if "SERVER" in self.server_info:
+            self.SERVER = self.server_info["SERVER"]
+        else:
+            self.SERVER = socket.gethostbyname(socket.gethostname())
         #self.SERVER = "192.168.1.14"
         self.PORT = self.server_info["PORT"]
         self.HEADER = self.server_info["HEADER"]
@@ -54,12 +57,12 @@ class BaseSocket:
             msg (bytes str): A serialized message to send to a socket
         """
         # Obtain the header of the message which will be used to establish the
-        # size of the message to be sent 
+        # size of the message to be sent
         header = self.get_header(msg)
 
         # Send the header containing the size of the data
         node.send(header)
-        
+
         # Send the message itself
         node.sendall(msg)
 
@@ -73,8 +76,8 @@ class BaseSocket:
             msg (bytes str): A serialized message
 
         Returns:
-            bytes str: A bytes string which will be the header of the message. 
-                It will indicate the number of bytes that the message will 
+            bytes str: A bytes string which will be the header of the message.
+                It will indicate the number of bytes that the message will
                 contain
         """
         # Obtain the length of the message
@@ -84,7 +87,7 @@ class BaseSocket:
         header = str(msg_length).encode(self.FORMAT)
         header += b" "*(self.HEADER - len(header))
         return header
-    
+
     def send_text(self, node, text):
         """Send a text to a socket
 
@@ -118,7 +121,7 @@ class BaseSocket:
             conn (socket): A socket connection to which receive a header from
 
         Returns:
-            (int): An integer number of bytes read from the header indicating 
+            (int): An integer number of bytes read from the header indicating
                 the number of bytes that the message will contain
         """
         # Receive the header itself
@@ -143,11 +146,11 @@ class BaseSocket:
 
     def get_long_message(self, n_bytes, conn):
         """Return a long message from the socket. Sometimes, it is possible that
-            a message being sent through a socket connection may not be complete. 
+            a message being sent through a socket connection may not be complete.
             For example, even though you set a socket to receive n_bytes, it is
-            possible that, if n_bytes >> 1, then it may receive less than 
-            n_bytes at a time until n_bytes has been sent. This method takes 
-            care of that by looping over the receiving function of a socket 
+            possible that, if n_bytes >> 1, then it may receive less than
+            n_bytes at a time until n_bytes has been sent. This method takes
+            care of that by looping over the receiving function of a socket
             until one has received the full message
 
         Args:
@@ -155,7 +158,7 @@ class BaseSocket:
             conn (socket): A socket from which to receive a message
 
         Returns:
-            (bytes str): A bytes string that contains the entire serialized 
+            (bytes str): A bytes string that contains the entire serialized
                 message
         """
         logging.debug("Compiling the message")
@@ -259,14 +262,14 @@ class ServerSocket(BaseSocket):
                 logging.info("\nQuitting the server")
                 self.exit()
                 break
-            
+
     def exit(self):
         """Method to be overwritten in case one wishes to perform an action 
             prior to quitting the server
         """
-        # 
-        pass 
-    
+        #
+        pass
+
     def handle_client(self, conn, addr):
         """Handle a connection to a client .
 
@@ -283,8 +286,8 @@ class ServerSocket(BaseSocket):
                 # Obtain the full message
                 msg = self.get_long_message(n_bytes, conn)
 
-                # If the client has asked to disconnect, then send a 
-                # confirmation message back to the client and break out of the 
+                # If the client has asked to disconnect, then send a
+                # confirmation message back to the client and break out of the
                 # while loop
                 if msg == self.DISCONNECT_MSG.encode(self.FORMAT):
                     conn.send("Disconnected\n".encode(self.FORMAT))
@@ -293,7 +296,7 @@ class ServerSocket(BaseSocket):
                 # Process the message in whichever way you prefer
                 self.process_msg(msg)
 
-                # Send a confirmation message to the client confirming that 
+                # Send a confirmation message to the client confirming that
                 # you've received the message
                 self.confirm_message_received(conn)
 
